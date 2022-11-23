@@ -44,7 +44,7 @@ server <- function(input, output) {
   
   output$data_table <- 
     renderTable({
-      vancouver_climate()
+      filtered_data()
     }) #Remember the curly bracket if multiple lines!
 }
 
