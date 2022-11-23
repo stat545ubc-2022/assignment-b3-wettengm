@@ -2,8 +2,10 @@ library(shiny)
 library(tidyverse)
 library(tidyquant)
 library(ggplot2)
+library(DT)
 
 vancouver_climate <- read_csv("vancouver_climate.csv")
+vancouver_climate$Year <- as.factor(vancouver_climate$year)
 
 ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
   titlePanel("Vancouver Historical Climate (1986 - 2021)"),
@@ -17,7 +19,11 @@ ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
     )
     ,
     mainPanel(
-      plotOutput("rainfall_time"), # This is the place holder for out plot
+      tabsetPanel(
+        tabPanel("Moving Average", plotOutput("rainfall_time")),
+        tabPanel("Trend", plotOutput("rainfall_scatter")),
+        tabPanel("Boxplot", plotOutput("rainfall_boxplot"))
+      ),
       tableOutput("data_table")
     )
   ),
@@ -41,9 +47,27 @@ server <- function(input, output) {
   output$rainfall_time <- 
     renderPlot({
       filtered_data() %>% #Have to add round brackets as it's being treated as a function
-        ggplot(aes(x = LOCAL_DATE, y = total_rain)) + geom_ma(ma_fun = SMA, n = 90, linetype = 1) +
-        labs(x = "Year", y = "Average Temperature (C)", title = "Mean Temperature")
-    }) #Use the curly brackets to allow multiple lines of ggplot code!
+        ggplot(aes(x = LOCAL_DATE, y = mean_temp)) + 
+        geom_ma(ma_fun = SMA, n = 14, linetype = 1) +
+        geom_ma(ma_fun = SMA, n = 365, linetype = 2) +
+        labs(x = "Year", y = "Average Temperature (C)", title = "Average Daily Temperature")
+    }) 
+  
+  output$rainfall_scatter <- 
+    renderPlot({
+      filtered_data() %>%
+        group_by(year) %>% summarise(mean_temperature = round(mean(mean_temp), 2)) %>%
+        ggplot(aes(x = year, y = mean_temperature)) + 
+        geom_point() + 
+        geom_smooth(method = lm)
+    })
+  
+  output$rainfall_boxplot <- 
+    renderPlot({
+      filtered_data() %>% 
+        ggplot(aes(x = Year, y = mean_temp)) + 
+        geom_boxplot(position = "dodge")
+    })
   
   output$data_table <- 
     renderTable({
