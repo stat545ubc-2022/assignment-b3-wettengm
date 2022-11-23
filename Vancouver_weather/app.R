@@ -1,17 +1,17 @@
 library(shiny)
 library(tidyverse)
 
-bcl <- read_csv("bcl-data.csv")
+vancouver_climate <- read_csv("vancouver_climate.csv")
 
 ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
-  titlePanel("BC Liquor Store Data"),
+  titlePanel("Vancouver Historical Climate (1986 - 2021)"),
   h5("Welcome to my shiny app!"),
   br(),
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
-      sliderInput("priceInput", "Price", 0, 100,
-                  value = c(25,40), pre = "$"), #value indicated start values
-      radioButtons("typeInput", "Type",
+      sliderInput("yearinput", "Year", 1986, 2022,
+                  value = c(1986,2021), pre = "Year"), #value indicated start values
+      radioButtons("typeinput", "Type",
                    choices = c("BEER", "REFRESHMENT",
                                "SPIRITS", "WINE")) 
     )
