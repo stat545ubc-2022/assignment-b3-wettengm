@@ -5,7 +5,7 @@ vancouver_climate <- read_csv("vancouver_climate.csv")
 
 ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
   titlePanel("Vancouver Historical Climate (1986 - 2021)"),
-  h5("Welcome to my shiny app!"),
+  h5("Welcome to my shiny application!"),
   br(),
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
@@ -44,7 +44,7 @@ server <- function(input, output) {
   
   output$data_table <- 
     renderTable({
-      vancouver_climate()
+      filtered_data()
     }) #Remember the curly bracket if multiple lines!
 }
 
