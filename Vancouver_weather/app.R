@@ -1,5 +1,7 @@
 library(shiny)
 library(tidyverse)
+library(tidyquant)
+library(ggplot2)
 
 vancouver_climate <- read_csv("vancouver_climate.csv")
 
@@ -39,7 +41,8 @@ server <- function(input, output) {
   output$rainfall_time <- 
     renderPlot({
       filtered_data() %>% #Have to add round brackets as it's being treated as a function
-        ggplot(aes(total_rain)) + geom_histogram()
+        ggplot(aes(x = LOCAL_DATE, y = total_rain)) + geom_ma(ma_fun = SMA, n = 90, linetype = 1) +
+        labs(x = "Year", y = "Average Temperature (C)", title = "Mean Temperature")
     }) #Use the curly brackets to allow multiple lines of ggplot code!
   
   output$data_table <- 
