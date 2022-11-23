@@ -9,7 +9,7 @@ ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
   br(),
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
-      sliderInput("yearinput", "Year", 1986, 2022,
+      sliderInput("yearinput", "Year", 1986, 2021,
                   value = c(1986,2021), pre = "Year"), #value indicated start values
       radioButtons("typeinput", "Type",
                    choices = c("BEER", "REFRESHMENT",
