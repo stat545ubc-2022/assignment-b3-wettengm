@@ -9,15 +9,13 @@ ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
   br(),
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
-      sliderInput("yearinput", "Year", 1986, 2021,
+      sliderInput("yearInput", "Year", 1986, 2021,
                   value = c(1986,2021), pre = "Year"), #value indicated start values
-      radioButtons("typeinput", "Type",
-                   choices = c("BEER", "REFRESHMENT",
-                               "SPIRITS", "WINE")) 
+  
     )
     ,
     mainPanel(
-      plotOutput("alcohol_hist"), # This is the place holder for out plot
+      plotOutput("rainfall_time"), # This is the place holder for out plot
       tableOutput("data_table")
     )
   ),
@@ -34,20 +32,19 @@ server <- function(input, output) {
   
   filtered_data <- 
     reactive({ 
-      bcl %>% filter(Price > input$priceInput[1] &
-                       Price < input$priceInput[2] &
-                       Type == input$typeInput)
+      vancouver_climate %>% filter(year > input$yearInput[1] &
+                       year < input$yearInput[2])
     }) #use the reactive function if the table changes!
   
-  output$alcohol_hist <- 
+  output$rainfall_time <- 
     renderPlot({
       filtered_data() %>% #Have to add round brackets as it's being treated as a function
-        ggplot(aes(Alcohol_Content)) + geom_histogram()
+        ggplot(aes(total_rain)) + geom_histogram()
     }) #Use the curly brackets to allow multiple lines of ggplot code!
   
   output$data_table <- 
     renderTable({
-      filtered_data()
+      vancouver_climate()
     }) #Remember the curly bracket if multiple lines!
 }
 
