@@ -16,7 +16,7 @@ ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
     "Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
      1986 through 2020. The data was downloaded from the",
     tags$a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
-           "Canadian Centre for Climare Services.")
+           "Canadian Centre for Climate Services.")
   ),
 
   br(),
