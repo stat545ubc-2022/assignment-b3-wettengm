@@ -9,13 +9,16 @@ vancouver_climate$Year <- as.factor(vancouver_climate$year)
 vancouver_climate$Month <- as.factor(vancouver_climate$month)
 
 
-ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
+ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
   titlePanel("Vancouver Historical Climate (1986 - 2020)"),
-  h5("Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
-     1986 through 2020. Feel free to download the .csv data used for the application here."),
   
-  
-  
+  tags$div(
+    "Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
+     1986 through 2020. The data was downloaded from the",
+    tags$a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
+           "Canadian Centre for Climare Services.")
+  ),
+
   br(),
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
@@ -28,14 +31,12 @@ ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
     mainPanel(
       tabsetPanel(
         tabPanel("Moving Average", plotOutput("rainfall_time")),
+        tabPanel("Yearly Patterns", plotOutput("yearly_temperature")),
         tabPanel("Monthly Distributions", plotOutput("rainfall_boxplot")),
-        tabPanel("Boxplot", plotOutput("rainfall_box"))
       ),
       DTOutput("data_table")
     )
-  ),
-  a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
-    "Link to the original data set") #Could put this anywhere!
+  )
 )
 
 
@@ -47,35 +48,53 @@ server <- function(input, output) {
   
   filtered_data <- 
     reactive({ 
-      vancouver_climate %>% filter(year > input$yearInput[1] &
-                       year < input$yearInput[2])
+      vancouver_climate %>% filter(year >= input$yearInput[1] &
+                       year <= input$yearInput[2])
     }) #use the reactive function if the table changes!
   
   output$rainfall_time <- 
     renderPlot({
       filtered_data() %>% #Have to add round brackets as it's being treated as a function
         ggplot(aes(x = LOCAL_DATE, y = mean_temp)) + 
-        geom_ma(ma_fun = SMA, n = 14, linetype = 1) +
-        geom_ma(ma_fun = SMA, n = 365, linetype = 2) +
-        labs(x = "Year", y = "Average Temperature (C)", title = "Average Daily Temperature")
+        geom_ma(ma_fun = SMA, n = 30, linetype = 1, aes(color = 'Monthly')) +
+        geom_ma(ma_fun = SMA, n = 365, linetype = 1, aes(color = 'Yearly')) +
+        labs(x = "Year" , y = "Temperature (C)", title = "Average Air Temperature") +
+        scale_color_manual(name = 'Moving average',
+                           breaks = c('Monthly', 'Yearly'),
+                           values = c('Monthly'='blue', 'Yearly'='red')
+                           )
     }) 
+  
+  
+  output$yearly_temperature <-
+    renderPlot({
+      filtered_data() %>%
+        group_by(Year, Month) %>%
+        summarise(Mean_temp = mean(mean_temp)) %>%
+        ggplot(aes(x=Month, y=Mean_temp, group = Year, colour = Year)) + 
+        geom_line() + 
+        scale_x_discrete(labels=month.abb) +
+        labs(y= "Temperature (C)", x = "Month")
+    })
+  
   
   output$rainfall_boxplot <- 
     renderPlot({
       filtered_data() %>%
-        group_by(year) %>% 
-        group_by(month) %>%
+        group_by(Year) %>% 
+        group_by(Month) %>%
         ggplot(aes(x = Month, y = mean_temp)) + 
         geom_boxplot(position = "dodge") +
-        scale_x_discrete(labels=month.abb)   
+        scale_x_discrete(labels=month.abb) +
+        labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distribution")
     })
   
-  output$rainfall_box <- 
-    renderPlot({
-      filtered_data() %>% 
-        ggplot(aes(x = Year, y = mean_temp)) + 
-        geom_boxplot(position = "dodge")
-    })
+  #output$rainfall_box <- 
+    #renderPlot({
+    #  filtered_data() %>% 
+       # ggplot(aes(x = Year, y = mean_temp)) + 
+       # geom_boxplot(position = "dodge")
+   # })
   
   output$data_table <- 
     renderDT({
