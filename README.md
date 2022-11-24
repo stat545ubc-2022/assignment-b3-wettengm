@@ -15,7 +15,7 @@ My shiny app focuses on visualizing climate data for Vancouver; spanning from 19
 
 ### Accessing the app
 
-The app can be accessed via the link: (https://wettengm.shinyapps.io/Vancouver_weather/)
+The app can be accessed via the link: https://wettengm.shinyapps.io/Vancouver_weather/
 
 
 ## Repository navigation 
