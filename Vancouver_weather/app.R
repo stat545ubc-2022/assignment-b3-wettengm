@@ -6,28 +6,35 @@ library(DT)
 
 vancouver_climate <- read_csv("vancouver_climate.csv")
 vancouver_climate$Year <- as.factor(vancouver_climate$year)
+vancouver_climate$Month <- as.factor(vancouver_climate$month)
+
 
 ui <- fluidPage( # Order of the following arguments matters! Goes top to bottom.
-  titlePanel("Vancouver Historical Climate (1986 - 2021)"),
-  h5("Welcome to my shiny application!"),
+  titlePanel("Vancouver Historical Climate (1986 - 2020)"),
+  h5("Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
+     1986 through 2020. Feel free to download the .csv data used for the application here."),
+  
+  
+  
   br(),
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
-      sliderInput("yearInput", "Year", 1986, 2021,
-                  value = c(1986,2021), pre = "Year"), #value indicated start values
+      sliderInput("yearInput", "Year", 1986, 2020,
+                  value = c(1986,2020), #value indicated start values
+                  sep = "")
   
     )
     ,
     mainPanel(
       tabsetPanel(
         tabPanel("Moving Average", plotOutput("rainfall_time")),
-        tabPanel("Trend", plotOutput("rainfall_scatter")),
-        tabPanel("Boxplot", plotOutput("rainfall_boxplot"))
+        tabPanel("Monthly Distributions", plotOutput("rainfall_boxplot")),
+        tabPanel("Boxplot", plotOutput("rainfall_box"))
       ),
-      tableOutput("data_table")
+      DTOutput("data_table")
     )
   ),
-  a(href = "https://weather.com/en-CA/weather/today/l/584018bec07ce9573837c14fa59da031fa6fcdeb1c3c9e3b2b27cb79ce254b5a?Goto=Redirected",
+  a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
     "Link to the original data set") #Could put this anywhere!
 )
 
@@ -53,16 +60,17 @@ server <- function(input, output) {
         labs(x = "Year", y = "Average Temperature (C)", title = "Average Daily Temperature")
     }) 
   
-  output$rainfall_scatter <- 
+  output$rainfall_boxplot <- 
     renderPlot({
       filtered_data() %>%
-        group_by(year) %>% summarise(mean_temperature = round(mean(mean_temp), 2)) %>%
-        ggplot(aes(x = year, y = mean_temperature)) + 
-        geom_point() + 
-        geom_smooth(method = lm)
+        group_by(year) %>% 
+        group_by(month) %>%
+        ggplot(aes(x = Month, y = mean_temp)) + 
+        geom_boxplot(position = "dodge") +
+        scale_x_discrete(labels=month.abb)   
     })
   
-  output$rainfall_boxplot <- 
+  output$rainfall_box <- 
     renderPlot({
       filtered_data() %>% 
         ggplot(aes(x = Year, y = mean_temp)) + 
@@ -70,7 +78,7 @@ server <- function(input, output) {
     })
   
   output$data_table <- 
-    renderTable({
+    renderDT({
       filtered_data()
     }) #Remember the curly bracket if multiple lines!
 }
