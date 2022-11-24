@@ -89,13 +89,6 @@ server <- function(input, output) {
         labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distribution")
     })
   
-  #output$rainfall_box <- 
-    #renderPlot({
-    #  filtered_data() %>% 
-       # ggplot(aes(x = Year, y = mean_temp)) + 
-       # geom_boxplot(position = "dodge")
-   # })
-  
   output$data_table <- 
     renderDT({
       filtered_data()
