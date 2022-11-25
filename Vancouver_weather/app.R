@@ -4,6 +4,7 @@ library(tidyquant)
 library(ggplot2)
 library(DT)
 
+
 vancouver_climate <- read_csv("vancouver_climate.csv")
 vancouver_climate$Year <- as.factor(vancouver_climate$year)
 vancouver_climate$Month <- as.factor(vancouver_climate$month)
@@ -20,6 +21,8 @@ ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
   ),
 
   br(),
+  # Allowing the user to select input years for the plots. 
+  # Can subset for different years to see differences in trends for various time periods. 
   sidebarLayout( #help(sidebarLayout),
     sidebarPanel(
       sliderInput("yearInput", "Year", 1986, 2020,
@@ -28,6 +31,8 @@ ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
   
     )
     ,
+    # The tabs pannel helps seperate the plots for easier navigation. 
+    # This will be especially useful when I add in other variables for assignment b04 to keep the app organized. 
     mainPanel(
       tabsetPanel(
         tabPanel("Moving Average", plotOutput("rainfall_time")),
@@ -51,7 +56,7 @@ server <- function(input, output) {
       vancouver_climate %>% filter(year >= input$yearInput[1] &
                        year <= input$yearInput[2])
     }) #use the reactive function if the table changes!
-  
+  # Time series plot with moving averages visualizes the seasonality in temperature but also potential long-term trends.
   output$rainfall_time <- 
     renderPlot({
       filtered_data() %>% #Have to add round brackets as it's being treated as a function
@@ -65,7 +70,7 @@ server <- function(input, output) {
                            )
     }) 
   
-  
+  # Monthly average temperatures by year is another way to seperate the the different years (treating them as independent) to see if there are any differences between years. 
   output$yearly_temperature <-
     renderPlot({
       filtered_data() %>%
@@ -77,7 +82,7 @@ server <- function(input, output) {
         labs(y= "Temperature (C)", x = "Month")
     })
   
-  
+  # side-by-side box plots differentiates the pattern and distribution between the months of the year.
   output$rainfall_boxplot <- 
     renderPlot({
       filtered_data() %>%
@@ -89,6 +94,8 @@ server <- function(input, output) {
         labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distribution")
     })
   
+  # The data should be easily accessible and having a snippet shows the user how the data is formatted for easier interpretation of plots. 
+  # providing the data table also is being more transparent with analysis process.
   output$data_table <- 
     renderDT({
       filtered_data()
