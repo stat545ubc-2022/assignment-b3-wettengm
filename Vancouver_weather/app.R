@@ -6,6 +6,8 @@ library(DT)
 
 
 vancouver_climate <- read_csv("vancouver_climate.csv")
+# Creating a factor variable for month and year as some of the plots need it instead of the continuous version.
+# Still keeping continuous variables.
 vancouver_climate$Year <- as.factor(vancouver_climate$year)
 vancouver_climate$Month <- as.factor(vancouver_climate$month)
 
@@ -70,7 +72,7 @@ server <- function(input, output) {
                            )
     }) 
   
-  # Monthly average temperatures by year is another way to seperate the the different years (treating them as independent) to see if there are any differences between years. 
+  # Monthly average temperature separated by year is a way to distinguish temperature patterns/differences between years (treating them as independent). 
   output$yearly_temperature <-
     renderPlot({
       filtered_data() %>%
@@ -83,6 +85,7 @@ server <- function(input, output) {
     })
   
   # side-by-side box plots differentiates the pattern and distribution between the months of the year.
+  # Helpful to see if certain months are prone to more extreme temperature patterns. 
   output$rainfall_boxplot <- 
     renderPlot({
       filtered_data() %>%
@@ -95,7 +98,7 @@ server <- function(input, output) {
     })
   
   # The data should be easily accessible and having a snippet shows the user how the data is formatted for easier interpretation of plots. 
-  # providing the data table also is being more transparent with analysis process.
+  # Providing the data table also is being more transparent with analysis process.
   output$data_table <- 
     renderDT({
       filtered_data()
