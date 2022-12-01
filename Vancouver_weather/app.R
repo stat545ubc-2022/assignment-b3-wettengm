@@ -17,42 +17,64 @@ vancouver_climate <- rename(vancouver_climate, "Rainfall" = total_rain)
 vancouver_climate <- rename(vancouver_climate, "Snowfall" = total_snow)
 vancouver_climate <- vancouver_climate[ , c(1,2,3,4,5,9,10,11,12)]
 
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ui <- fluidPage(theme = shinytheme("flatly"),
-  h1("Vancouver Historical Climate (1986 - 2020)"),
-  
-  h3(
-    "Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
+ui <- navbarPage("Vancouver Historical Climate (1986 - 2020)", theme = shinytheme("flatly"),
+  tabPanel("Temperature",
+           h4("Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
      1986 through 2020. The data was downloaded from the",
-    tags$a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
-           "Canadian Centre for Climate Services.")
-  ),
-
-  br(),
-  # Allowing the user to select input years for the plots. 
-  # Can subset for different years to see differences in trends for various time periods. 
-  sidebarLayout( #help(sidebarLayout),
-    sidebarPanel(
-      sliderInput("yearInput", "Year", 1986, 2020,
-                  value = c(1986,2020), #value indicated start values
-                  sep = ""),
-      tags$div("Download the filtered data here:"),
-      downloadButton("downloadData", "Download Data")
-    )
-    ,
-    # The tabs panel helps separate the plots for easier navigation. 
-    # This will be especially useful when I add in other variables for assignment b04 to keep the app organized. 
-    mainPanel(
-      h4("Temperature"),
-      tabsetPanel(
-        tabPanel("Moving Average", plotOutput("temperature_time")),
-        tabPanel("Yearly Patterns", plotOutput("yearly_temperature")),
-        tabPanel("Monthly Distributions", plotOutput("temperature_boxplot")),
-      ),
-      DTOutput("data_table")
-    )
-  )
+              tags$a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
+                     "Canadian Centre for Climate Services.")
+           ),
+           
+           br(),
+           # Allowing the user to select input years for the plots. 
+           # Can subset for different years to see differences in trends for various time periods. 
+           sidebarLayout( #help(sidebarLayout),
+             sidebarPanel(
+               img(src = "Vancouver.jpg", height = 205, width = 410),
+               br(),
+               
+               sliderInput("yearInput", "Year", 1986, 2020,
+                           value = c(1986,2020), #value indicated start values
+                           sep = "")
+             ),
+             # The tabs panel helps separate the plots for easier navigation. 
+             # This will be especially useful when I add in other variables for assignment b04 to keep the app organized. 
+             mainPanel(
+               h4("Temperature"),
+               tabsetPanel(
+                 tabPanel("Moving Average", plotOutput("temperature_time")),
+                 tabPanel("Yearly Patterns", plotOutput("yearly_temperature")),
+                 tabPanel("Monthly Distributions", plotOutput("temperature_boxplot")),
+                        )
+                      )
+                    )
+    ),
+  
+  tabPanel("Data",
+           sidebarLayout(
+             sidebarPanel(
+               img(src = "Vancouver.jpg", height = 205, width = 410),
+               br(),
+               
+               sliderInput("yearInput1", "Year", 1986, 2020,
+                           value = c(1986,2020), #value indicated start values
+                           sep = ""),
+               tags$div("Download the filtered data here:"),
+               downloadButton("downloadData1", "Download Data"),
+               tags$div("Download the complete data file here:"),
+               downloadButton("downloadData", "Download Data")
+             ),
+             mainPanel(
+               DTOutput("data_table1")  
+                    )
+                  )
+                )
+  
+  
 )
 
 
@@ -60,22 +82,44 @@ ui <- fluidPage(theme = shinytheme("flatly"),
 
 server <- function(input, output) {
   
+# This data file is for the temperature plots
   filtered_data <- 
     reactive({ 
       vancouver_climate %>% filter(year >= input$yearInput[1] &
                        year <= input$yearInput[2])
-    }) #use the reactive function if the table changes!
+    }) 
   
-  # Adding in filtered data output so user can download the data file
+# This data file is for the rainfall plots
+  filtered_data2 <- 
+    reactive({ 
+      vancouver_climate %>% filter(year >= input$yearInput2[1] &
+                                     year <= input$yearInput2[2])
+    }) 
+  
+# This data file is for the final data table
+  filtered_data1 <- 
+    reactive({ 
+      vancouver_climate %>% filter(year >= input$yearInput1[1] &
+                                     year <= input$yearInput1[2])
+    })
+  # This download button is for the yearly filtered data
+  output$downloadData1 <- downloadHandler(
+    filename = function() {
+      paste("Vancouver_Climate", ".csv", sep="")
+    },
+    content = function(file) {
+      write.csv(filtered_data1(), file)
+    }
+  )
+  # This download button is for the raw data file
   output$downloadData <- downloadHandler(
     filename = function() {
       paste("Vancouver_Climate", ".csv", sep="")
     },
     content = function(file) {
-      write.csv(filtered_data(), file)
+      write.csv(vancouver_climate, file)
     }
   )
-
   
   
   
@@ -122,10 +166,10 @@ server <- function(input, output) {
   
   # The data should be easily accessible and having a snippet shows the user how the data is formatted for easier interpretation of plots. 
   # Providing the data table also is being more transparent with analysis process.
-  output$data_table <- 
+  output$data_table1 <- 
     renderDT({
-      filtered_data()
-    }) #Remember the curly bracket if multiple lines!
+      filtered_data1()
+    }) 
 }
 
 shinyApp(ui = ui, server = server)
