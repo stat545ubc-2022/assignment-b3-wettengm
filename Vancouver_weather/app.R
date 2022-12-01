@@ -54,6 +54,31 @@ ui <- navbarPage("Vancouver Historical Climate (1986 - 2020)", theme = shinythem
                     )
     ),
   
+  tabPanel("Rainfall",
+           # Allowing the user to select input years for the plots. 
+           # Can subset for different years to see differences in trends for various time periods. 
+           sidebarLayout( #help(sidebarLayout),
+             sidebarPanel(
+               img(src = "Vancouver.jpg", height = 205, width = 410),
+               br(),
+               
+               sliderInput("yearInput2", "Year", 1986, 2020,
+                           value = c(1986,2020), #value indicated start values
+                           sep = "")
+             ),
+             # The tabs panel helps separate the plots for easier navigation. 
+             # This will be especially useful when I add in other variables for assignment b04 to keep the app organized. 
+             mainPanel(
+               h4("Rainfall"),
+               tabsetPanel(
+                 tabPanel("Moving Average", plotOutput("rainfall_time")),
+                 tabPanel("Yearly Patterns", plotOutput("yearly_rainfall")),
+                 tabPanel("Monthly Distributions", plotOutput("rainfall_boxplot")),
+               )
+             )
+           )
+  ),
+  
   tabPanel("Data",
            sidebarLayout(
              sidebarPanel(
@@ -124,10 +149,10 @@ server <- function(input, output) {
   
   
 
-  # Time series plot with moving averages visualizes the seasonality in temperature but also potential long-term trends.
+  # Time series plot with moving averages visualizes the seasonality of environmental variables but also potential long-term trends.
   output$temperature_time <- 
     renderPlot({
-      filtered_data() %>% #Have to add round brackets as it's being treated as a function
+      filtered_data() %>% 
         ggplot(aes(x = Date, y = Temperature)) + 
         geom_ma(ma_fun = SMA, n = 30, linetype = 1, aes(color = 'Monthly')) +
         geom_ma(ma_fun = SMA, n = 365, linetype = 1, aes(color = 'Yearly')) +
@@ -137,8 +162,20 @@ server <- function(input, output) {
                            values = c('Monthly'='black', 'Yearly'='red')
                            )
     }) 
+  output$rainfall_time <- 
+    renderPlot({
+      filtered_data2() %>% 
+        ggplot(aes(x = Date, y = Rainfall)) + 
+        geom_ma(ma_fun = SMA, n = 30, linetype = 1, aes(color = 'Monthly')) +
+        geom_ma(ma_fun = SMA, n = 365, linetype = 1, aes(color = 'Yearly')) +
+        labs(x = "Year" , y = "Rainfall (mm)", title = "Average Rainfall") +
+        scale_color_manual(name = 'Moving average',
+                           breaks = c('Monthly', 'Yearly'),
+                           values = c('Monthly'='black', 'Yearly'='red')
+        )
+    })
   
-  # Monthly average temperature separated by year is a way to distinguish temperature patterns/differences between years (treating them as independent). 
+  # Monthly average separated by year is a way to distinguish environmental variable patterns/differences between years (treating them as independent). 
   output$yearly_temperature <-
     renderPlot({
       filtered_data() %>%
@@ -150,9 +187,20 @@ server <- function(input, output) {
         labs(y= "Temperature (C)", x = "Month", title = "Yearly Temperature Patterns")
       
     })
+  output$yearly_rainfall <-
+    renderPlot({
+      filtered_data2() %>%
+        group_by(Year, Month) %>%
+        summarise(Mean_rain = mean(Rainfall)) %>%
+        ggplot(aes(x=Month, y=Mean_rain, group = Year, colour = Year)) + 
+        geom_line() + 
+        scale_x_discrete(labels=month.abb) +
+        labs(y= "Rainfall (mm)", x = "Month", title = "Yearly Rainfall Patterns")
+      
+    })
   
   # side-by-side box plots differentiates the pattern and distribution between the months of the year.
-  # Helpful to see if certain months are prone to more extreme temperature patterns. 
+  # Helpful to see if certain months are prone to more extreme temperature and rainfall patterns. 
   output$temperature_boxplot <- 
     renderPlot({
       filtered_data() %>%
@@ -161,7 +209,17 @@ server <- function(input, output) {
         ggplot(aes(x = Month, y = Temperature)) + 
         geom_boxplot(position = "dodge") +
         scale_x_discrete(labels=month.abb) +
-        labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distribution")
+        labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distributions")
+    })
+  output$rainfall_boxplot <- 
+    renderPlot({
+      filtered_data2() %>%
+        group_by(Year) %>% 
+        group_by(Month) %>%
+        ggplot(aes(x = Month, y = Rainfall)) + 
+        geom_boxplot(position = "dodge") +
+        scale_x_discrete(labels=month.abb) +
+        labs(x = "Month", y = "Rainfall (mm)", title = "Monthly Rainfall Distributions")
     })
   
   # The data should be easily accessible and having a snippet shows the user how the data is formatted for easier interpretation of plots. 
