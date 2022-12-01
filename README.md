@@ -2,11 +2,18 @@
 
 ## Assignment information
 
-I chose option B - creating my own shiny app. I selected historical climate data for Vancouver, BC as my primary data set to include in my application.   
+For assignment B03 I chose option B - creating my own shiny app. I selected historical climate data for Vancouver, BC as my primary data set to include in my application.  
+
+For assignment B04, I decided to chose option C where I will be adding and editing my shiny app from assignment B03. The features I added to my shiny app from assignment B03 include:
+1. Aesthetics: Images of Vancouver and different theme 
+2. Navigation tabs
+3. Plots for rainfall variable
+4. Download data buttons 
 
 ## Accessing the app
 
-The app can be accessed via the link: https://wettengm.shinyapps.io/Vancouver_weather/
+Assignment B03: [V1.0.0](https://wettengm.shinyapps.io/Vancouver_weather/)
+Assignment B04: [V1.1.0]()
 
 ## Description
 

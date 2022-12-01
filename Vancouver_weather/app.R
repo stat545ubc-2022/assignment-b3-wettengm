@@ -204,22 +204,22 @@ server <- function(input, output) {
   output$temperature_boxplot <- 
     renderPlot({
       filtered_data() %>%
-        group_by(Year) %>% 
-        group_by(Month) %>%
-        ggplot(aes(x = Month, y = Temperature)) + 
+        group_by(Year, Month) %>% 
+        summarise(mean_temp = mean(Temperature)) %>%
+        ggplot(aes(x = Month, y = mean_temp)) + 
         geom_boxplot(position = "dodge") +
         scale_x_discrete(labels=month.abb) +
-        labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distributions")
+        labs(x = "Month", y = "Temperature (C)", title = "Mean Monthly Temperature Distributions")
     })
   output$rainfall_boxplot <- 
     renderPlot({
       filtered_data2() %>%
-        group_by(Year) %>% 
-        group_by(Month) %>%
-        ggplot(aes(x = Month, y = Rainfall)) + 
+        group_by(Year, Month) %>% 
+        summarise(sum_rain = sum(Rainfall)) %>%
+        ggplot(aes(x = Month, y = sum_rain)) + 
         geom_boxplot(position = "dodge") +
         scale_x_discrete(labels=month.abb) +
-        labs(x = "Month", y = "Rainfall (mm)", title = "Monthly Rainfall Distributions")
+        labs(x = "Month", y = "Rainfall (mm)", title = "Monthly Total Rainfall Distributions")
     })
   
   # The data should be easily accessible and having a snippet shows the user how the data is formatted for easier interpretation of plots. 
