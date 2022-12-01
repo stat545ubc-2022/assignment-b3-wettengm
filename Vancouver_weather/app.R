@@ -3,6 +3,7 @@ library(tidyverse)
 library(tidyquant)
 library(ggplot2)
 library(DT)
+library(ggiraph)
 
 
 vancouver_climate <- read_csv("vancouver_climate.csv")
