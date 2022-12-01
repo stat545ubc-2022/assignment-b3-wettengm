@@ -3,7 +3,7 @@ library(tidyverse)
 library(tidyquant)
 library(ggplot2)
 library(DT)
-library(ggiraph)
+library(shinythemes)
 
 
 vancouver_climate <- read_csv("vancouver_climate.csv")
@@ -11,12 +11,18 @@ vancouver_climate <- read_csv("vancouver_climate.csv")
 # Still keeping continuous variables.
 vancouver_climate$Year <- as.factor(vancouver_climate$year)
 vancouver_climate$Month <- as.factor(vancouver_climate$month)
+vancouver_climate <- rename(vancouver_climate, "Date" = LOCAL_DATE)
+vancouver_climate <- rename(vancouver_climate, "Temperature" = mean_temp)
+vancouver_climate <- rename(vancouver_climate, "Rainfall" = total_rain)
+vancouver_climate <- rename(vancouver_climate, "Snowfall" = total_snow)
+vancouver_climate <- vancouver_climate[ , c(1,2,3,4,5,9,10,11,12)]
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
-  titlePanel("Vancouver Historical Climate (1986 - 2020)"),
+ui <- fluidPage(theme = shinytheme("flatly"),
+  h1("Vancouver Historical Climate (1986 - 2020)"),
   
-  tags$div(
+  h3(
     "Welcome to my shiny app! This application is exploring historical climate data for the City of Vancouver from 
      1986 through 2020. The data was downloaded from the",
     tags$a(href = "https://climate-change.canada.ca/climate-data/#/daily-climate-data",
@@ -30,17 +36,19 @@ ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
     sidebarPanel(
       sliderInput("yearInput", "Year", 1986, 2020,
                   value = c(1986,2020), #value indicated start values
-                  sep = "")
-  
+                  sep = ""),
+      tags$div("Download the filtered data here:"),
+      downloadButton("downloadData", "Download Data")
     )
     ,
-    # The tabs pannel helps seperate the plots for easier navigation. 
+    # The tabs panel helps separate the plots for easier navigation. 
     # This will be especially useful when I add in other variables for assignment b04 to keep the app organized. 
     mainPanel(
+      h4("Temperature"),
       tabsetPanel(
-        tabPanel("Moving Average", plotOutput("rainfall_time")),
+        tabPanel("Moving Average", plotOutput("temperature_time")),
         tabPanel("Yearly Patterns", plotOutput("yearly_temperature")),
-        tabPanel("Monthly Distributions", plotOutput("rainfall_boxplot")),
+        tabPanel("Monthly Distributions", plotOutput("temperature_boxplot")),
       ),
       DTOutput("data_table")
     )
@@ -48,9 +56,7 @@ ui <- fluidPage( # Order of the following arguments matters. Goes top to bottom.
 )
 
 
-
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 server <- function(input, output) {
   
@@ -59,17 +65,32 @@ server <- function(input, output) {
       vancouver_climate %>% filter(year >= input$yearInput[1] &
                        year <= input$yearInput[2])
     }) #use the reactive function if the table changes!
+  
+  # Adding in filtered data output so user can download the data file
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("Vancouver_Climate", ".csv", sep="")
+    },
+    content = function(file) {
+      write.csv(filtered_data(), file)
+    }
+  )
+
+  
+  
+  
+
   # Time series plot with moving averages visualizes the seasonality in temperature but also potential long-term trends.
-  output$rainfall_time <- 
+  output$temperature_time <- 
     renderPlot({
       filtered_data() %>% #Have to add round brackets as it's being treated as a function
-        ggplot(aes(x = LOCAL_DATE, y = mean_temp)) + 
+        ggplot(aes(x = Date, y = Temperature)) + 
         geom_ma(ma_fun = SMA, n = 30, linetype = 1, aes(color = 'Monthly')) +
         geom_ma(ma_fun = SMA, n = 365, linetype = 1, aes(color = 'Yearly')) +
         labs(x = "Year" , y = "Temperature (C)", title = "Average Air Temperature") +
         scale_color_manual(name = 'Moving average',
                            breaks = c('Monthly', 'Yearly'),
-                           values = c('Monthly'='blue', 'Yearly'='red')
+                           values = c('Monthly'='black', 'Yearly'='red')
                            )
     }) 
   
@@ -78,21 +99,22 @@ server <- function(input, output) {
     renderPlot({
       filtered_data() %>%
         group_by(Year, Month) %>%
-        summarise(Mean_temp = mean(mean_temp)) %>%
+        summarise(Mean_temp = mean(Temperature)) %>%
         ggplot(aes(x=Month, y=Mean_temp, group = Year, colour = Year)) + 
         geom_line() + 
         scale_x_discrete(labels=month.abb) +
-        labs(y= "Temperature (C)", x = "Month")
+        labs(y= "Temperature (C)", x = "Month", title = "Yearly Temperature Patterns")
+      
     })
   
   # side-by-side box plots differentiates the pattern and distribution between the months of the year.
   # Helpful to see if certain months are prone to more extreme temperature patterns. 
-  output$rainfall_boxplot <- 
+  output$temperature_boxplot <- 
     renderPlot({
       filtered_data() %>%
         group_by(Year) %>% 
         group_by(Month) %>%
-        ggplot(aes(x = Month, y = mean_temp)) + 
+        ggplot(aes(x = Month, y = Temperature)) + 
         geom_boxplot(position = "dodge") +
         scale_x_discrete(labels=month.abb) +
         labs(x = "Month", y = "Temperature (C)", title = "Monthly Temperature Distribution")
