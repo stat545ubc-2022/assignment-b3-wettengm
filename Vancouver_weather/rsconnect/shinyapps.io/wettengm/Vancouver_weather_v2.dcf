@@ -1,0 +1,13 @@
+name: Vancouver_weather_v2
+title: Vancouver_weather_v2
+username:
+account: wettengm
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7789811
+bundleId: 6579487
+url: https://wettengm.shinyapps.io/Vancouver_weather_v2/
+when: 1669938042.1849
+lastSyncTime: 1669938042.18492
+asMultiple: FALSE
+asStatic: FALSE

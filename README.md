@@ -13,11 +13,11 @@ For assignment B04, I decided to chose option C where I will be adding and editi
 ## Accessing the app
 
 Assignment B03: [V1.0.0](https://wettengm.shinyapps.io/Vancouver_weather/) <br />
-Assignment B04: [V1.1.0]()
+Assignment B04: [V1.1.0](https://wettengm.shinyapps.io/Vancouver_weather_v2/)
 
 ## Description
 
-My shiny app focuses on visualizing climate data for Vancouver; spanning from 1986 through 2020. I have chosen air temperature as the primary variable to explore in this app for the first iteration. The plots include a monthly and yearly moving average, year specific temperature patterns, and month specific temperature distributions. The input years for the plots can be changed using the slider bar on the left had side of the app and a snippet of the data table appears below the plots. 
+My shiny app focuses on visualizing climate data for Vancouver; spanning from 1986 through 2020. I have chosen air temperature and rainfall as the variables to explore in this app. The plots include a monthly and yearly moving average, year specific temperature and rainfall patterns, and monthly specific distributions. The input years for the plots can be changed using the slider bar on the left had side of the app and a snippet of the data table appears below the plots. 
 
 ## Data source
 
