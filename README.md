@@ -12,7 +12,7 @@ For assignment B04, I decided to chose option C where I will be adding and editi
 
 ## Accessing the app
 
-Assignment B03: [V1.0.0](https://wettengm.shinyapps.io/Vancouver_weather/)
+Assignment B03: [V1.0.0](https://wettengm.shinyapps.io/Vancouver_weather/) <br />
 Assignment B04: [V1.1.0]()
 
 ## Description
